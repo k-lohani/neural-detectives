@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # Load from the parent directory of 'neural-detectives'
-env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+env_path = Path(__file__).resolve().parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 MONGODB_URI = os.getenv("MONGODB_URI") or os.getenv("MONGO_URI", "mongodb://localhost:27017")

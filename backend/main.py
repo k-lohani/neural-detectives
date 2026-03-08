@@ -111,11 +111,18 @@ def _extract_suggested_accusation(solver: GridSolver, case_data: dict) -> Option
 async def start_new_game(difficulty: str = "easy"):
     case_package = await build_new_case_workflow(difficulty)
 
-    db = get_database()
-    await db["cases"].insert_one(case_package)
-    case_package.pop("_id", None)
-
     case_id = case_package["case_id"]
+
+    try:
+        db_doc = json.loads(json.dumps(case_package))
+        for entity_list in ("suspects", "weapons", "locations"):
+            for e in db_doc.get(entity_list, []):
+                e.pop("icon", None)
+        db_doc.pop("comic_panels", None)
+        db = get_database()
+        await db["cases"].insert_one(db_doc)
+    except Exception as e:
+        print(f"[DB] Could not persist case to MongoDB: {e}")
     active_cases[case_id] = case_package
 
     suspects = [s["name"] for s in case_package["suspects"]]
@@ -150,11 +157,18 @@ async def generate_comic_panels_background(case_id: str):
     if case_id in active_cases:
         active_cases[case_id]["comic_panels"] = panels
 
-    db = get_database()
-    await db["cases"].update_one(
-        {"case_id": case_id},
-        {"$set": {"comic_panels": panels}}
-    )
+    try:
+        metadata_only = [
+            {"scene_text": p.get("scene_text", ""), "caption": p.get("caption", "")}
+            for p in panels
+        ]
+        db = get_database()
+        await db["cases"].update_one(
+            {"case_id": case_id},
+            {"$set": {"comic_panels_meta": metadata_only}}
+        )
+    except Exception as e:
+        print(f"[Comic] Skipped DB persist (too large): {e}")
 
     return {"comic_panels": panels}
 

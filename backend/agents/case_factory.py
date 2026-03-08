@@ -126,15 +126,32 @@ async def generate_entity_icons(case_package: dict):
     client = get_genai_client()
     loop = asyncio.get_event_loop()
 
-    STYLE = "high-contrast black and white ink illustration, film noir style, white lines on solid black background, no color, no shading, clean vector art, 1940s detective aesthetic"
+    STYLE = (
+        "Monochrome ink on paper, single-weight black pen strokes on off-white parchment, "
+        "crosshatch shading, 1940s pulp detective magazine spot illustration, "
+        "no color, no gradients, no photorealism, hand-drawn look"
+    )
 
     entities = []
     for s in case_package.get("suspects", []):
-        entities.append((s, f"{STYLE}. Portrait bust of a noir mystery character named {s['name']}. Face and shoulders only, dramatic lighting from one side.", "3:4"))
+        entities.append((s, (
+            f"{STYLE}. Head-and-shoulders portrait facing three-quarter view. "
+            f"Character: {s['name']}. Strong jawline and expressive eyes, "
+            f"dramatic single-source lighting from the left, deep crosshatch shadows on one side of face. "
+            f"Plain empty background."
+        ), "3:4"))
     for w in case_package.get("weapons", []):
-        entities.append((w, f"{STYLE}. Single isolated object: {w['name']}. Centered on black background, simple iconic depiction.", "1:1"))
+        entities.append((w, (
+            f"{STYLE}. Single object centered on empty background: {w['name']}. "
+            f"Technical illustration style, clean outline, crosshatch shading for volume. "
+            f"No hands, no people, no scene — object only."
+        ), "1:1"))
     for l in case_package.get("locations", []):
-        entities.append((l, f"{STYLE}. Exterior or interior scene: {l['name']}. Simple architectural silhouette, moody atmosphere.", "1:1"))
+        entities.append((l, (
+            f"{STYLE}. Establishing shot of a location: {l['name']}. "
+            f"Wide angle, architectural line drawing with crosshatch shadows, "
+            f"moody atmosphere, no people, empty scene."
+        ), "1:1"))
 
     print(f"[Icons] Generating {len(entities)} entity icons sequentially...")
     for entity_dict, prompt, ratio in entities:
