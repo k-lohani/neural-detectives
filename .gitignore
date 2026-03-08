@@ -1,0 +1,16 @@
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.eslintcache
